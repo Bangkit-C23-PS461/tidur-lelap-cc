@@ -34,11 +34,13 @@ def get_sleep_quality():
     sleep_time = 8  # Dummy sleep time
     sleep_noise = 2  # Dummy sleep noise
     sleep_score = 9  # Dummy sleep score
+    snore_count = 3  # Dummy snore count
     
     return jsonify({
         "sleepTime": sleep_time,
         "sleepNoise": sleep_noise,
-        "sleepScore": sleep_score
+        "sleepScore": sleep_score,
+        "snoreCount": snore_count
     }), 200
 
 @app.route('/sleep/session', methods=['POST'])
