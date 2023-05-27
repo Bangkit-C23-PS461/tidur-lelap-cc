@@ -1,14 +1,15 @@
 PORT=5000
 APP=app
 PYTHON=python3.10
+PIP=3.10
 
 # Install pipenv
 pipenv:
-	$(PYTHON) -m pip install --user pipenv 
+	$(PYTHON) -m $(PIP) install --user pipenv 
 
 # Install dependencies
 prep:
-	$(PYTHON) -m pipenv install
+	$(PYTHON) -m pipenv install flask_sqlalchemy flask_jwt_extended flask mysqlclient configparser
 
 # Activate pipenv
 shell:
@@ -16,7 +17,7 @@ shell:
 
 # Run flask app
 run:
-	$(PYTHON) -m pipenv run flask --app $(APP) run -h localhost -p $(PORT)
+	$(PYTHON) -m pipenv run flask --app $(APP) run -h localhost -p $(PORT) --debug
 
 IMAGE_NAME=bangkit-sleep-app-be-image
 IMAGE_TAG=latest

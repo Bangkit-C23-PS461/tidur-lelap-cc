@@ -1,58 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from flask_sqlalchemy import SQLAlchemy
-
-app = Flask(__name__)
-app.config['JWT_SECRET_KEY'] = 'your_secret_key'  # Modify this secret key
-
-# Configure your SQL database connection
-app.config['SQLALCHEMY_DATABASE_URI'] = 'your_database_connection_uri'  # Modify this database connection URI
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+from app import app, db
+from app.model import Users
 
 jwt = JWTManager(app)
-db = SQLAlchemy(app)
-
-
-# Define the User model
-class User(db.Model):
-    user_id = db.Column(db.String(50), primary_key=True)
-    username = db.Column(db.String(50), nullable=False)
-    email = db.Column(db.String(50), nullable=False)
-    password = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.TIMESTAMP, nullable=False)
-    created_by = db.Column(db.String(50), nullable=False)
-    updated_by = db.Column(db.String(50), nullable=False)
-    updated_at = db.Column(db.TIMESTAMP, nullable=False)
-    deleted_by = db.Column(db.String(50))
-    deleted_at = db.Column(db.TIMESTAMP)
-
-    def __repr__(self):
-        return f"<User(user_id='{self.user_id}', username='{self.username}', email='{self.email}')>"
-
-
-# Define the SleepSession model
-class SleepSession(db.Model):
-    session_id = db.Column(db.String(50), primary_key=True)
-    user_id = db.Column(db.String(50), db.ForeignKey('user.user_id'), nullable=False)
-    from_time = db.Column(db.TIMESTAMP, nullable=False)
-    to_time = db.Column(db.TIMESTAMP, nullable=False)
-    sleep_time = db.Column(db.Integer, nullable=False)
-    url_recording = db.Column(db.String(255), nullable=False)
-    noise = db.Column(db.Integer, nullable=False)
-    created_at = db.Column(db.TIMESTAMP, nullable=False)
-    created_by = db.Column(db.String(50), nullable=False)
-    updated_by = db.Column(db.String(50), nullable=False)
-    updated_at = db.Column(db.TIMESTAMP, nullable=False)
-    deleted_by = db.Column(db.String(50))
-    deleted_at = db.Column(db.TIMESTAMP)
-
-    def __repr__(self):
-        return f"<SleepSession(session_id='{self.session_id}', user_id='{self.user_id}')>"
-
-
-# Configure database tables
-db.create_all()
-
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -60,13 +11,20 @@ def login():
     password = request.json.get('password')
     
     # Add your login logic here
+    user = Users.query.filter_by(email=email).first()
+
+    # check if the user actually exists
+    # take the user-supplied password, hash it, and compare it to the hashed password in the database
+    # if not user or not check_password_hash(user.password, password):
+    #     flash('Please check your login details and try again.')
+    #     return redirect(url_for('auth.login')) # if the user doesn't exist or password is wrong, reload the page
     
     # Verify user credentials (dummy example)
-    if email == 'user@example.com' and password == 'password':
-        access_token = create_access_token(identity=email)
-        return jsonify({'access_token': access_token}), 201
+    if email == user.email and password == user.password:
+        access_token =create_access_token(identity=email)
+        return jsonify({'token': access_token, 'message': 'login success!'}), 200
     else:
-        return jsonify({'message': 'Invalid email or password'}), 401
+        return jsonify({'message': 'invalid email or password'}), 401
 
 
 @app.route('/register', methods=['POST'])
@@ -78,15 +36,15 @@ def register():
     # Add your registration logic here
     
     # Store user in the database
-    new_user = User(
+    new_user = Users(
         user_id='generate_user_id',  # Generate a unique user ID
         username=username,
         email=email,
         password=password,
-        created_at='current_timestamp',  # Set the current timestamp
+        created_at='2023-05-29 00:00:00',  # Set the current timestamp
         created_by='user_id',  # Set the user ID of the creator
         updated_by='user_id',  # Set the user ID of the updater
-        updated_at='current_timestamp'  # Set the current timestamp
+        updated_at='2023-05-29 00:00:01'  # Set the current timestamp
     )
     db.session.add(new_user)
     db.session.commit()
