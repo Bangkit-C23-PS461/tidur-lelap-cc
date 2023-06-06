@@ -1,5 +1,3 @@
-import tensorflow as tf
-import subprocess
 from keras.models import load_model
 
 # Model Path
