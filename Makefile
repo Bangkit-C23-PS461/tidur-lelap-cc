@@ -1,15 +1,15 @@
 PORT=5000
 APP=app
 PYTHON=python3.10
-PIP=3.10
+PIP=pip
 
 # Install pipenv
 pipenv:
-	$(PYTHON) -m $(PIP) install --user pipenv 
+	$(PYTHON) -m $(PIP) install --user pipenv
 
 # Install dependencies
 prep:
-	$(PYTHON) -m pipenv install flask_sqlalchemy flask_jwt_extended flask mysqlclient configparser
+	$(PYTHON) -m pipenv install
 
 # Activate pipenv
 shell:
