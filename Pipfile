@@ -11,6 +11,8 @@ mysqlclient = "*"
 configparser = "*"
 tensorflow = "*"
 keras = "*"
+librosa = "*"
+shortuuid = "*"
 
 [dev-packages]
 
