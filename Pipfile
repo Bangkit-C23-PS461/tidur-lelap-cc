@@ -9,6 +9,8 @@ flask-sqlalchemy = "*"
 flask-jwt-extended = "*"
 mysqlclient = "*"
 configparser = "*"
+tensorflow = "*"
+keras = "*"
 
 [dev-packages]
 
