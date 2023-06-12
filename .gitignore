@@ -3,3 +3,4 @@ config.ini
 *.hdf5
 *.aac
 *.wav
+*.DS_Store

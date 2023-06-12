@@ -3,9 +3,9 @@ import subprocess
 from keras.models import load_model
 
 # Model Path
-MODEL_PATH = "ml/Snoring-Detection-Model-44100.hdf5"
-AUDIO_PATH = "ml/fat guy snoring.aac"
-AUDIO_PATH_WAV = "ml/audio.wav"
+MODEL_PATH = "Snoring-Detection-Model-44100.hdf5"
+AUDIO_PATH = "audio/fat guy snoring.aac"
+AUDIO_PATH_WAV = "audio.wav"
 
 
 # Load audio
@@ -44,7 +44,7 @@ def preprocess_audio(wav):
 
 
 # Model predict function
-def predict(model_path=MODEL_PATH, audio_path=AUDIO_PATH, threshold=0.5):
+def predict_snore(model_path=MODEL_PATH, audio_path=AUDIO_PATH, threshold=0.5):
     # Load variables
     model = load_model(model_path, compile=False)
     audio_data = load_audio_data(audio_path)
@@ -67,4 +67,4 @@ def predict(model_path=MODEL_PATH, audio_path=AUDIO_PATH, threshold=0.5):
         "count": count
     })
 
-print(predict())
+# print(predict())

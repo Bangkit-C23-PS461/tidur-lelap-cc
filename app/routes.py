@@ -4,6 +4,8 @@ from app import app, db
 from app.model import Users, SleepSession, SleepScore, SleepSnore
 from app.utils import calculate_sleep_time, save_audio_file, calculate_sleep_noise
 from datetime import datetime
+from ml.model_snore_detection import predict_snore
+from ml.model_stress_classification import predict_stress
 import shortuuid
 
 jwt = JWTManager(app)
@@ -63,7 +65,7 @@ def get_sleep_quality():
     # Add your logic to retrieve sleep quality based on the provided date
     
     sleep_time =  10 # Dummy sleep time
-    sleep_noise = 2  # Dummy sleep noise
+    sleep_noise = 65  # Dummy sleep noise
     sleep_score = 9  # Dummy sleep score
     snore_count = 5  # Dummy snore count
     

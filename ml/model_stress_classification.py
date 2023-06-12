@@ -7,7 +7,7 @@ RR = 19.1   # Snoring rate in bpm
 SD = 6.1    # Sleep duration in hour
 
 # Model predict function
-def predict(model_path=MODEL_PATH, snoring_range=SR, snoring_rate=RR, sleep_duration=SD):
+def predict_stress(model_path=MODEL_PATH, snoring_range=SR, snoring_rate=RR, sleep_duration=SD):
     # Load variables
     model = load_model(model_path, compile=False)
 
