@@ -3,16 +3,16 @@ import subprocess
 from keras.models import load_model
 
 # Model Path
-MODEL_PATH = "Snoring-Detection-Model-44100.hdf5"
-AUDIO_PATH = "audio/fat guy snoring.aac"
-AUDIO_PATH_WAV = "audio.wav"
+MODEL_PATH = "/Users/v-ramadhana.w/Documents/tidur-lelap-cc/ml/Snoring-Detection-Model-44100.hdf5"
+AUDIO_PATH = "/Users/v-ramadhana.w/Documents/tidur-lelap-cc/audio/fat_guy _snoring.aac"
+AUDIO_PATH_WAV = "/Users/v-ramadhana.w/Documents/tidur-lelap-cc/ml/audio.wav"
 
 
 # Load audio
 def load_audio_data(audio_path=AUDIO_PATH, audio_dest=AUDIO_PATH_WAV, duration=1):
     # Convert aac to wav and load audio
     # NOTE: PLEASE INSTALL FFMPEG, MORE INFO AT https://ffmpeg.org/
-    subprocess.run(["ffmpeg", "-i", audio_path, "-acodec", "pcm_s16le", "-ar", "44100", audio_dest])
+    subprocess.run(["ffmpeg", "-y", "-i", audio_path, "-acodec", "pcm_s16le", "-ar", "44100", audio_dest])
     audio = tf.io.read_file(audio_dest)
     audio, sample_rate = tf.audio.decode_wav(audio, desired_channels=-1)
 
@@ -62,9 +62,11 @@ def predict_snore(model_path=MODEL_PATH, audio_path=AUDIO_PATH, threshold=0.5):
         if el >= threshold:
             count += 1
 
-    return ({
-        "result": result,
-        "count": count
-    })
+    # return ({
+    #     "result": result,
+    #     "count": count
+    # })
 
-# print(predict())
+    return count
+
+# print(predict_snore())

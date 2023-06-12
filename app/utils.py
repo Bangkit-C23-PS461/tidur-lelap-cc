@@ -9,6 +9,11 @@ def calculate_sleep_time(from_time, to_time):
 
     return (datetime2 - datetime1).total_seconds()
 
+def get_aac_audio_length(file_path):
+    audio = AudioSegment.from_file(file_path, format="aac")
+    duration_in_minutes = len(audio) / 60000  # Convert milliseconds to seconds
+    return duration_in_minutes
+
 def calculate_sleep_noise(aac_file):
     # Convert AAC to WAV
     audio = AudioSegment.from_file(aac_file, format="aac")

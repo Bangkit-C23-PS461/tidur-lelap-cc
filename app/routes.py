@@ -2,13 +2,17 @@ from flask import Flask, request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
 from app import app, db
 from app.model import Users, SleepSession, SleepScore, SleepSnore
-from app.utils import calculate_sleep_time, save_audio_file, calculate_sleep_noise
-from datetime import datetime
+from app.utils import calculate_sleep_time, save_audio_file, calculate_sleep_noise, get_aac_audio_length
+from datetime import datetime, timedelta
 from ml.model_snore_detection import predict_snore
 from ml.model_stress_classification import predict_stress
 import shortuuid
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from . import config
 
 jwt = JWTManager(app)
+engine = create_engine(config['SQL']['SQL_URI'])
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -62,18 +66,48 @@ def register():
 def get_sleep_quality():
     date = request.args.get('date')
 
-    # Add your logic to retrieve sleep quality based on the provided date
+    # Convert the date string to a datetime object
+    date_obj = datetime.strptime(date, '%Y-%m-%d')
+
+    # Set the time component to 23:59:59
+    end_of_day = date_obj.replace(hour=23, minute=59, second=59)
+
+    # Convert the datetime object back to a string
+    end_of_day_string = end_of_day.strftime('%Y-%m-%d %H:%M:%S')    
+
+    claims = get_jwt()
+    uuid=claims['user_id']
+
+    # date1 =datetime.strftime("%Y-%m-%d")
+    date_obj = datetime.strptime(date, "%Y-%m-%d")
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
+
+    sleep_session = session.query(SleepSession).filter(
+        SleepSession.user_id == uuid,
+        SleepSession.from_time <= end_of_day_string,
+        SleepSession.to_time >= end_of_day_string
+    ).first()
+
     
-    sleep_time =  10 # Dummy sleep time
-    sleep_noise = 65  # Dummy sleep noise
-    sleep_score = 9  # Dummy sleep score
-    snore_count = 5  # Dummy snore count
     
+    sleep_time =  sleep_session.sleep_time # Dummy sleep time
+    sleep_noise = calculate_sleep_noise(sleep_session.url_recording)  # Dummy sleep noise
+    snore_count = predict_snore(audio_path = sleep_session.url_recording)  # Dummy sleep score
+    
+    snore_count_bpm = snore_count/get_aac_audio_length(sleep_session.url_recording)
+    
+    sleep_time_hour = sleep_time / 3600
+    # hours = sleep_time_hour.seconds // 3600
+
+    sleep_score = predict_stress(snoring_range=sleep_noise, snoring_rate=snore_count_bpm,sleep_duration=sleep_time_hour)  # Dummy snore count
+
     return jsonify({
         "sleepTime": sleep_time,
         "sleepNoise": sleep_noise,
         "sleepScore": sleep_score,
-        "snoreCount": snore_count,
+        "snoreCount": snore_count_bpm,
     }), 200
 
 
@@ -107,6 +141,8 @@ def save_sleep_session():
     )
     db.session.add(new_session)
     db.session.commit()
+
+    
     
     return jsonify({"message": "Sleep session saved successfully"}), 201
 
