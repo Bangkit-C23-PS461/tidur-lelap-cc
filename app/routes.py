@@ -96,8 +96,8 @@ def save_sleep_session():
         to_time=to_time,
         sleep_time=calculate_sleep_time(from_time, to_time),  # Call your sleep time calculation function
         url_recording=audio_file_path,
-        noise=10,  # Call your sleep noise calculation function
-        # noise=calculate_sleep_noise(audio_file_path),  # Call your sleep noise calculation function
+        # noise=10,  # Call your sleep noise calculation function
+        noise=calculate_sleep_noise(audio_file_path),  # Call your sleep noise calculation function
         created_at=current_timestamp,  # Set the current timestamp
         created_by=claims['user_id'],  # Set the user ID of the creator
         updated_by=claims['user_id'],  # Set the user ID of the updater
