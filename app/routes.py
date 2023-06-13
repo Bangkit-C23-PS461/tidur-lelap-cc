@@ -2,7 +2,7 @@ from flask import request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
 from app import app, db
 from app.model import Users, SleepSession
-from app.utils import calculate_sleep_time, save_file, remove_file, calculate_sleep_noise, get_aac_audio_length
+from app.utils import calculate_sleep_time, save_file, remove_file, calculate_sleep_noise, get_aac_audio_length, aac_to_wav
 from datetime import datetime
 from ml.model_snore_detection import predict_snore
 from ml.model_stress_classification import predict_stress
@@ -121,8 +121,9 @@ def save_sleep_session():
     current_timestamp = datetime.now().isoformat()
     sleep_time = calculate_sleep_time(from_time, to_time)
 
-    sleep_noise = calculate_sleep_noise(url_recording)  # Dummy sleep noise
-    snore_count = predict_snore(audio_path = url_recording)  # Dummy sleep score
+    wav_file = aac_to_wav(url_recording)
+    sleep_noise = calculate_sleep_noise(wav_file)  # Dummy sleep noise
+    snore_count = predict_snore(audio_path = wav_file)  # Dummy sleep score
 
     snore_count_bpm = snore_count/get_aac_audio_length(url_recording)
     
@@ -151,6 +152,7 @@ def save_sleep_session():
     db.session.commit()
 
     # Remove audio file
+    remove_file(wav_file)
     remove_file(url_recording)
     
     seconds = time.time() - start_time

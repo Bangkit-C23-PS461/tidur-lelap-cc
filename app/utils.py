@@ -1,6 +1,10 @@
 from datetime import datetime
 import os, math
 from pydub import AudioSegment
+import shortuuid
+
+
+AUDIO_PATH = "{base_path}/audio/".format(base_path=os.getcwd())
 
 def calculate_sleep_time(from_time, to_time):
 
@@ -14,11 +18,15 @@ def get_aac_audio_length(file_path):
     duration_in_minutes = len(audio) / 60000  # Convert milliseconds to seconds
     return duration_in_minutes
 
-def calculate_sleep_noise(aac_file):
-    # Convert AAC to WAV
+def aac_to_wav(aac_file):
     audio = AudioSegment.from_file(aac_file, format="aac")
-    wav_file = "converted.wav"
+    wav_file = AUDIO_PATH+ shortuuid.uuid()+"converted.wav"
     audio.export(wav_file, format="wav")
+
+    return wav_file
+
+
+def calculate_sleep_noise(wav_file):
 
     # Load the WAV file
     audio = AudioSegment.from_file(wav_file)
@@ -29,8 +37,8 @@ def calculate_sleep_noise(aac_file):
     # Convert RMS to decibels (dB)
     sleep_noise = 20 * math.log10(rms)
 
-    # Remove the temporary WAV file
-    os.remove(wav_file)
+    #  Remove the temporary WAV file
+    # os.remove(wav_file)
 
     return sleep_noise
 
@@ -42,7 +50,8 @@ def save_file(audio_recording):
         if not os.path.exists(folder_path):
             # Create the folder
             os.makedirs(folder_path)
-        file_path = os.path.join(folder_path, audio_file.filename)  # Join root folder path with the filename
+        audioname = shortuuid.uuid()+audio_file.filename
+        file_path = os.path.join(folder_path, audioname)  # Join root folder path with the filename
         audio_file.save(file_path)
         return file_path
     

@@ -1,18 +1,19 @@
 import tensorflow as tf
-import subprocess
+import subprocess, shortuuid, os
 from keras.models import load_model
+import os
 
 # Model Path
-MODEL_PATH = "/Users/v-ramadhana.w/Documents/tidur-lelap-cc/ml/Snoring-Detection-Model-44100.hdf5"
-AUDIO_PATH = "/Users/v-ramadhana.w/Documents/tidur-lelap-cc/audio/fat_guy _snoring.aac"
-AUDIO_PATH_WAV = "/Users/v-ramadhana.w/Documents/tidur-lelap-cc/ml/audio.wav"
+MODEL_PATH = "{base_path}/ml/Snoring-Detection-Model-44100.hdf5".format(base_path=os.getcwd())
+AUDIO_PATH = "{base_path}/audio/fat_guy _snoring.aac".format(base_path=os.getcwd())
+AUDIO_PATH_WAV = "audio.wav"
 
 
 # Load audio
 def load_audio_data(audio_path=AUDIO_PATH, audio_dest=AUDIO_PATH_WAV, duration=1):
     # Convert aac to wav and load audio
     # NOTE: PLEASE INSTALL FFMPEG, MORE INFO AT https://ffmpeg.org/
-    subprocess.run(["ffmpeg", "-y", "-i", audio_path, "-acodec", "pcm_s16le", "-ar", "44100", audio_dest])
+    # subprocess.run(["ffmpeg", "-y", "-i", audio_path, "-acodec", "pcm_s16le", "-ar", "44100", audio_dest])
     audio = tf.io.read_file(audio_dest)
     audio, sample_rate = tf.audio.decode_wav(audio, desired_channels=-1)
 
@@ -47,7 +48,7 @@ def preprocess_audio(wav):
 def predict_snore(model_path=MODEL_PATH, audio_path=AUDIO_PATH, threshold=0.5):
     # Load variables
     model = load_model(model_path, compile=False)
-    audio_data = load_audio_data(audio_path)
+    audio_data = load_audio_data(audio_path,audio_path)
     audio_data = audio_data.map(preprocess_audio)
 
     # Batch audio data for each second

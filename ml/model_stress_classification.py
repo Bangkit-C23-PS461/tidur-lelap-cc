@@ -1,7 +1,7 @@
 from keras.models import load_model
-
+import os
 # Model Path
-MODEL_PATH = "/Users/v-ramadhana.w/Documents/tidur-lelap-cc/ml/Stress-Level-Classification.hdf5"
+MODEL_PATH = "{base_path}/ml/Stress-Level-Classification.hdf5".format(base_path=os.getcwd())
 SR = 55.52  # Snoring range in dB
 RR = 19.1   # Snoring rate in bpm
 SD = 6.1    # Sleep duration in hour
