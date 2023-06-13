@@ -34,7 +34,7 @@ def calculate_sleep_noise(aac_file):
 
     return sleep_noise
 
-def save_audio_file(audio_recording):
+def save_file(audio_recording):
     audio_file = audio_recording
     
     if audio_file:
@@ -47,3 +47,14 @@ def save_audio_file(audio_recording):
         return file_path
     
     return ""
+
+def remove_file(file_path: str):
+    try:
+        os.remove(file_path)
+        print("File removed successfully.")
+    except FileNotFoundError:
+        print("File not found.")
+    except PermissionError:
+        print("Permission denied - unable to remove the file.")
+    except Exception as e:
+        print(f"An error occurred: {str(e)}")
