@@ -5,7 +5,7 @@ PIP=pip
 
 # Install pipenv
 pipenv:
-	$(PYTHON) -m $(PIP) install --user pipenv
+	$(PYTHON) -m $(PIP) install pipenv
 
 # Install dependencies
 prep:

@@ -1,8 +1,5 @@
 # Use an official Python runtime as the base image
-FROM python:3.10-alpine
-
-# Install ffmpeg
-RUN apk --no-cache add ffmpeg
+FROM python:3.10.12
 
 # Set the working directory in the container
 WORKDIR /app
@@ -10,10 +7,15 @@ WORKDIR /app
 # Copy the application code to the container
 COPY . .
 
-# Install pipenv
-RUN pip install --user pipenv
+# Install additional dependencies
+RUN apt-get update
 
-# Install dependencies
+RUN apt-get install -y ffmpeg libmariadb-dev-compat libmariadb-dev
+
+# Install pipenv
+RUN python3 -m pip install pipenv
+
+# Install app dependencies
 RUN python3 -m pipenv install --system --deploy
 
 # Expose the port that the Flask app will listen on
