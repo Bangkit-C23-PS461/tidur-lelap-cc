@@ -13,7 +13,7 @@ from . import config
 import time, re
 
 jwt = JWTManager(app)
-engine = create_engine(config['SQL']['SQL_URI'])
+engine = connect_unix_socket()
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -56,7 +56,7 @@ def register():
     Session = sessionmaker(bind=engine)
     session = Session()
     
-    user = session.query(Users).filter(or_(Users.username == username, Users.email == email)).all()
+    user = session.query(Users).filter(or_(Users.username == username, Users.email == email)).first()
 
     if user is not None:
         return jsonify({ "message": "user already exist" }), 400
