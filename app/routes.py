@@ -80,26 +80,26 @@ def get_sleep_quality():
     # Convert the date string to a datetime object
     date_obj = datetime.strptime(date, '%Y-%m-%d')
 
-    # Set the time component to 23:59:59
-    end_of_day = date_obj.replace(hour=23, minute=59, second=59)
-
-    # Convert the datetime object back to a string
-    end_of_day_string = end_of_day.strftime('%Y-%m-%d %H:%M:%S')    
-
     claims = get_jwt()
     uuid=claims['user_id']
-
-    # date1 =datetime.strftime("%Y-%m-%d")
-    date_obj = datetime.strptime(date, "%Y-%m-%d")
 
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    sleep_session = session.query(SleepSession).filter(
-        SleepSession.user_id == uuid,
-        SleepSession.from_time <= end_of_day_string,
-        SleepSession.to_time >= end_of_day_string
-    ).order_by(desc(SleepSession.from_time)).first()
+    sleep_session = None
+
+    for hour in range (23, 0, -1):
+        initial_hour = date_obj.replace(hour=hour, minute=0, second=0)
+        end_of_hour = date_obj.replace(hour=hour, minute=59, second=59)
+
+        sleep_session = session.query(SleepSession).filter(
+            SleepSession.user_id == uuid,
+            SleepSession.from_time >= initial_hour,
+            SleepSession.to_time <= end_of_hour
+        ).order_by(desc(SleepSession.from_time)).first()
+
+        if sleep_session is not None:
+            break
 
     if sleep_session is None:
         return jsonify({ "message": "no session found" }), 404
