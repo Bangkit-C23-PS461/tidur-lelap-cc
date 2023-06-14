@@ -7,7 +7,7 @@ from datetime import datetime
 from ml.model_snore_detection import predict_snore
 from ml.model_stress_classification import predict_stress
 import shortuuid
-from sqlalchemy import create_engine, desc
+from sqlalchemy import create_engine, desc, or_
 from sqlalchemy.orm import sessionmaker
 from . import config
 import time, re
@@ -52,6 +52,14 @@ def register():
 
     if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
         return jsonify({ "message": "please use a valid email" }), 400
+    
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    
+    user = session.query(Users).filter(or_(Users.username == username, Users.email == email)).all()
+
+    if user is not None:
+        return jsonify({ "message": "user already exist" }), 400
 
     current_timestamp = datetime.now().isoformat()
     
@@ -86,20 +94,12 @@ def get_sleep_quality():
     Session = sessionmaker(bind=engine)
     session = Session()
 
-    sleep_session = None
-
-    for hour in range (23, 0, -1):
-        initial_hour = date_obj.replace(hour=hour, minute=0, second=0)
-        end_of_hour = date_obj.replace(hour=hour, minute=59, second=59)
-
-        sleep_session = session.query(SleepSession).filter(
-            SleepSession.user_id == uuid,
-            SleepSession.from_time >= initial_hour,
-            SleepSession.to_time <= end_of_hour
-        ).order_by(desc(SleepSession.from_time)).first()
-
-        if sleep_session is not None:
-            break
+    end_of_day = date_obj.replace(hour=23, minute=59, second=59)
+    
+    sleep_session = session.query(SleepSession).filter(
+        SleepSession.user_id == uuid,
+        SleepSession.from_time <= end_of_day,
+    ).order_by(desc(SleepSession.from_time)).first()
 
     if sleep_session is None:
         return jsonify({ "message": "no session found" }), 404
