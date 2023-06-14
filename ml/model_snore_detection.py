@@ -1,5 +1,5 @@
 import tensorflow as tf
-import subprocess, shortuuid, os
+import os
 from keras.models import load_model
 import os
 
@@ -20,6 +20,10 @@ def load_audio_data(audio_path=AUDIO_PATH, audio_dest=AUDIO_PATH_WAV, duration=1
     # Divide for each second
     chunk_size = int(duration * sample_rate)
     audio_chunks = []
+
+    # Reshape to mono audio
+    audio = audio[:, :1]
+
     for i in range(0, audio.shape[0], chunk_size):
         chunk = audio[i:i+chunk_size]
 
@@ -48,7 +52,7 @@ def preprocess_audio(wav):
 def predict_snore(model_path=MODEL_PATH, audio_path=AUDIO_PATH, threshold=0.5):
     # Load variables
     model = load_model(model_path, compile=False)
-    audio_data = load_audio_data(audio_path,audio_path)
+    audio_data = load_audio_data(audio_path=audio_path, audio_dest=audio_path)
     audio_data = audio_data.map(preprocess_audio)
 
     # Batch audio data for each second
