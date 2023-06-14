@@ -15,6 +15,7 @@ librosa = "*"
 shortuuid = "*"
 pydub = "*"
 bcrypt = "*"
+pymysql = "*"
 
 [dev-packages]
 
