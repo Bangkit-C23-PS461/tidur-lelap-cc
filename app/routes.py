@@ -2,7 +2,7 @@ from flask import request, jsonify
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt
 from app import app, db
 from app.model import Users, SleepSession
-from app.utils import calculate_sleep_time, save_file, remove_file, calculate_sleep_noise, get_aac_audio_length, aac_to_wav
+from app.utils import *
 from datetime import datetime
 from ml.model_snore_detection import predict_snore
 from ml.model_stress_classification import predict_stress
@@ -10,7 +10,7 @@ import shortuuid
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 from . import config
-import time 
+import time, re
 
 jwt = JWTManager(app)
 engine = create_engine(config['SQL']['SQL_URI'])
@@ -22,9 +22,14 @@ def login():
     
     # Add your login logic here
     user = Users.query.filter_by(email=email).first()
+
+    if user is None:
+        return jsonify({ "message": "no user found" }), 404
+    
+    password_match = verify_password(password, user.password)
     
     # Verify user credentials (dummy example)
-    if email == user.email and password == user.password:
+    if password_match:
         additional_claims = {
             "username": user.username,
             "email": user.email,
@@ -42,6 +47,11 @@ def register():
     password = request.json.get('password')
     
     # Add your registration logic here
+    if any(char.isspace() for char in username):
+        return jsonify({ "message": "username should not contain a white space" }), 400
+
+    if not re.match(r'^[\w\.-]+@[\w\.-]+\.\w+$', email):
+        return jsonify({ "message": "please use a valid email" }), 400
 
     current_timestamp = datetime.now().isoformat()
     
@@ -50,7 +60,7 @@ def register():
         user_id=shortuuid.uuid(),  # Generate a unique user ID
         username=username,
         email=email,
-        password=password,
+        password=hash_password(password),
         created_at=current_timestamp,  # Set the current timestamp
         created_by='SYSTEM',  # Set the user ID of the creator
         updated_by='SYSTEM',  # Set the user ID of the updater
@@ -92,9 +102,7 @@ def get_sleep_quality():
     ).order_by(desc(SleepSession.from_time)).first()
 
     if sleep_session is None:
-        return jsonify({
-            "message": "no session found"
-        })
+        return jsonify({ "message": "no session found" }), 404
 
     return jsonify({
         "sleepTime":sleep_session.sleep_time,
@@ -132,7 +140,6 @@ def save_sleep_session():
 
     sleep_score = predict_stress(snoring_range=sleep_noise, snoring_rate=snore_count_bpm,sleep_duration=sleep_time_hour)  # Dummy snore count
 
-
     new_session = SleepSession(
         session_id= shortuuid.uuid(),  # Generate a unique session ID
         user_id=claims['user_id'],  # Get the current user ID from the JWT
@@ -160,8 +167,11 @@ def save_sleep_session():
     # print(filename+" received, response time: "+str(time)+"s")
     exec = str(round(minutes))+ "m" + str(round(seconds,2)) + "s"
     # print("Total Processing Time : " +str(round(minutes))+ "m" + str(round(seconds,2)) + "s")
-    return jsonify({"message": "Sleep session saved successfully",
-                    "execution_time":exec}), 201
+    
+    return jsonify({
+        "message": "Sleep session saved successfully",
+        "execution_time":exec
+    }), 201
 
 
 @app.route('/user/profile', methods=['GET'])
@@ -172,6 +182,9 @@ def get_user_profile():
     
     # Assuming you have a logged-in user and retrieve their profile information
     user = Users.query.filter_by(email=email).first()
+
+    if user is None:
+        return jsonify({ "message": "no user found" }), 404
     
     return jsonify({
         "username": user.username,

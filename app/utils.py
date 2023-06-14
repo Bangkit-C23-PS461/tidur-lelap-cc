@@ -1,8 +1,7 @@
 from datetime import datetime
 import os, math
 from pydub import AudioSegment
-import shortuuid
-
+import shortuuid, bcrypt
 
 AUDIO_PATH = "{base_path}/audio/".format(base_path=os.getcwd())
 
@@ -67,3 +66,15 @@ def remove_file(file_path: str):
         print("Permission denied - unable to remove the file.")
     except Exception as e:
         print(f"An error occurred: {str(e)}")
+
+def hash_password(password):
+    # Generate a salt
+    salt = bcrypt.gensalt()
+    
+    # Hash the password with the generated salt
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    
+    return hashed_password.decode('utf-8')
+
+def verify_password(password, hashed_password):
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
