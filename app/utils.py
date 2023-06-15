@@ -105,6 +105,7 @@ def connect_tcp_socket() -> sqlalchemy.engine.base.Engine:
             port=db_port,
             database=db_name,
         ),
+        pool_size=50,
         # ...
     )
     return pool

@@ -7,9 +7,8 @@ from datetime import datetime
 from ml.model_snore_detection import predict_snore
 from ml.model_stress_classification import predict_stress
 import shortuuid
-from sqlalchemy import create_engine, desc, or_
+from sqlalchemy import desc, or_
 from sqlalchemy.orm import sessionmaker
-from . import config
 import time, re
 
 jwt = JWTManager(app)
